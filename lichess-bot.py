@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import argparse
 import chess
 from chess.variant import find_variant
