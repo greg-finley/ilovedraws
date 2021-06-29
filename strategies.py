@@ -122,22 +122,24 @@ class WorstFish(ExampleEngine):
 
 	def evaluate (self, board, timeLimit = 0.1):
 		result = self.stockfish.analyse(board, chess.engine.Limit(time = timeLimit))
-		return result["score"]
+		return result["score"].relative
 
 	def search (self, board: chess.Board, *args):
 		legalMoves = list(board.legal_moves)
 
 		worstEvaluation = None
-		worstMove = None
+		worstMoves = []
 
 		for move in legalMoves:
 			board.push(move)
 			evaluation = self.evaluate(board)
 
-			if worstEvaluation is None or worstEvaluation <= evaluation.relative:
-				worstEvaluation = evaluation.relative
-				worstMove = move
+			if worstEvaluation is None or worstEvaluation < evaluation:
+				worstEvaluation = evaluation
+				worstMoves = [move]
+			elif worstEvaluation == evaluation:
+				worstMoves.append(move)
 
 			board.pop()
 
-		return worstMove
+		return random.choice(worstMoves)
