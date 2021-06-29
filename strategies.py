@@ -124,22 +124,43 @@ class WorstFish(ExampleEngine):
 		result = self.stockfish.analyse(board, chess.engine.Limit(time = timeLimit))
 		return result["score"].relative
 
-	def search (self, board: chess.Board, *args):
-		legalMoves = list(board.legal_moves)
+	def search (self, board: chess.Board, timeLeft, *args):
+		# Get amount of legal moves
+		legalMoves = tuple(board.legal_moves)
 
+		# Base search time per move in seconds
+		searchTime = 0.2
+
+		# If the engine will search for more than 10% of the remaining time, then shorten it
+		# to be 10% of the remaining time
+		# Also, dont do this on the first move (because of weird behaviour with timeLeft being a Limit on first move)
+		if type(timeLeft) != chess.engine.Limit:
+			if len(legalMoves) * searchTime > timeLeft / 10:
+				searchTime = (timeLeft / 10) / len(legalMoves)
+
+		# Initialise variables
 		worstEvaluation = None
 		worstMoves = []
 
+		# Evaluate each move
 		for move in legalMoves:
+			# Play move
 			board.push(move)
-			evaluation = self.evaluate(board)
 
+			# Evaluate position from opponent's perspective
+			evaluation = self.evaluate(board, searchTime)
+
+			# If the evaluation is better than worstEvaluation, replace the worstMoves list with just this move
 			if worstEvaluation is None or worstEvaluation < evaluation:
 				worstEvaluation = evaluation
 				worstMoves = [move]
+
+			# If the evaluation is the same as worstEvaluation, append the move to worstMoves
 			elif worstEvaluation == evaluation:
 				worstMoves.append(move)
 
+			# Un-play the move, ready for the next loop
 			board.pop()
 
+		# Return a random worst move
 		return random.choice(worstMoves)
