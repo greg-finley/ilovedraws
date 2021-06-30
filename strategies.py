@@ -144,8 +144,14 @@ class WorstFish(ExampleEngine):
 
 		# Evaluate each move
 		for move in legalMoves:
+			# Record if the move is a capture
+			move.isCapture = board.is_capture(move)
+
 			# Play move
 			board.push(move)
+
+			# Record if the move is a check
+			move.isCheck = board.is_check()
 
 			# Evaluate position from opponent's perspective
 			evaluation = self.evaluate(board, searchTime)
@@ -162,5 +168,24 @@ class WorstFish(ExampleEngine):
 			# Un-play the move, ready for the next loop
 			board.pop()
 
-		# Return a random worst move
-		return random.choice(worstMoves)
+		# Categorise the moves into captures, checks, and neither
+		worstCaptures = []
+		worstChecks = []
+		worstOther = []
+
+		for move in worstMoves:
+			if move.isCapture:
+				worstCaptures.append(move)
+			elif move.isCheck:
+				worstChecks.append(move)
+			else:
+				worstOther.append(move)
+
+		# Play a random move, preferring moves first from Other, then from Checks, then from Captures
+		if len(worstOther) != 0:
+			return random.choice(worstOther)
+		elif len(worstChecks) != 0:
+			return random.choice(worstChecks)
+		else:
+			return random.choice(worstCaptures)
+
