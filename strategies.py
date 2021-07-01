@@ -129,12 +129,13 @@ class WorstFish(ExampleEngine):
 		legalMoves = tuple(board.legal_moves)
 
 		# Base search time per move in seconds
-		searchTime = 0.2
+		searchTime = 0.1
 
 		# If the engine will search for more than 10% of the remaining time, then shorten it
 		# to be 10% of the remaining time
 		# Also, dont do this on the first move (because of weird behaviour with timeLeft being a Limit on first move)
 		if type(timeLeft) != chess.engine.Limit:
+			timeLeft /= 1000  # Convert to seconds
 			if len(legalMoves) * searchTime > timeLeft / 10:
 				searchTime = (timeLeft / 10) / len(legalMoves)
 
