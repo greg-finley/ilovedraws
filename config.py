@@ -47,4 +47,7 @@ def load_config(config_file):
         if not os.access(engine, os.X_OK) and CONFIG["engine"]["protocol"] != "homemade":
             raise Exception("The engine %s doesn't have execute (x) permission. Try: chmod +x %s" % (engine, engine))
 
+        with open("token.txt", "r") as tokenFile:
+            CONFIG["token"] = tokenFile.read().strip()
+
     return CONFIG

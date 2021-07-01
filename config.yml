@@ -1,4 +1,4 @@
-token: "rmpUtfM9MyJg2uPQ"    # Lichess OAuth2 Token.
+token: "NotHere"    # Lichess OAuth2 Token.
 url: "https://lichess.org/"  # Lichess base URL.
 
 engine:                      # Engine settings.
