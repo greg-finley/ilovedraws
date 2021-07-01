@@ -121,7 +121,7 @@ class WorstFish(ExampleEngine):
 	stockfish = chess.engine.SimpleEngine.popen_uci(stockfishPath)
 
 	def evaluate (self, board, timeLimit = 0.1):
-		result = self.stockfish.analyse(board, chess.engine.Limit(time = timeLimit))
+		result = self.stockfish.analyse(board, chess.engine.Limit(time = timeLimit - 0.01))
 		return result["score"].relative
 
 	def search (self, board: chess.Board, timeLeft, *args):
