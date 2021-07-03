@@ -118,7 +118,10 @@ class FirstMove(ExampleEngine):
 
 
 class WorstFish(ExampleEngine):
-	stockfish = chess.engine.SimpleEngine.popen_uci(stockfishPath)
+
+	def __init__ (self, *args):
+		self.stockfish = chess.engine.SimpleEngine.popen_uci(stockfishPath)
+		super().__init__(*args)
 
 	def evaluate (self, board, timeLimit = 0.1):
 		result = self.stockfish.analyse(board, chess.engine.Limit(time = timeLimit - 0.01))
