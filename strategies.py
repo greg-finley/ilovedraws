@@ -190,3 +190,5 @@ class WorstFish(ExampleEngine):
 		else:
 			return random.choice(worstCaptures)
 
+	def quit(self):
+		self.stockfish.close()
