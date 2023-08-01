@@ -1,3 +1,9 @@
+# Worstfish Bot
+
+A Lichess bot which uses stockfish to play the worst possible moves. Online at [lichess.org/@/WorstFish](https://lichess.org/@/WorstFish)
+
+Original readme below:
+
 # lichess-bot
 
 [![Python Build](https://github.com/ShailChoksi/lichess-bot/actions/workflows/python-build.yml/badge.svg)](https://github.com/ShailChoksi/lichess-bot/actions/workflows/python-build.yml)
