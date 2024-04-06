@@ -90,34 +90,11 @@ class ExampleEngine(MinimalEngine):
     pass
 
 
-# Strategy names and ideas from tom7's excellent eloWorld video
-
-
-class RandomMove(ExampleEngine):
-    def search(self, board, *args):
-        return random.choice(list(board.legal_moves))
-
-
-class Alphabetical(ExampleEngine):
-    def search(self, board, *args):
-        moves = list(board.legal_moves)
-        moves.sort(key=board.san)
-        return moves[0]
-
-
-class FirstMove(ExampleEngine):
-    """Gets the first move when sorted by uci representation"""
-
-    def search(self, board, *args):
-        moves = list(board.legal_moves)
-        moves.sort(key=str)
-        return moves[0]
-
-
-class WorstFish(ExampleEngine):
+class ILoveDraws(ExampleEngine):
 
     def __init__(self, *args):
         self.stockfish = chess.engine.SimpleEngine.popen_uci(stockfishPath)
+        self.minimal_drawishness = 0.1
         super().__init__(*args)
 
     def evaluate(self, board, timeLimit=0.1):
@@ -128,7 +105,9 @@ class WorstFish(ExampleEngine):
 
     def search(self, board: chess.Board, timeLeft, *args):
         # Get amount of legal moves
-        legalMoves = tuple(board.legal_moves)
+        legalMoves = list(board.legal_moves)
+        # Shuffle the moves to make the bot less predictable
+        random.shuffle(legalMoves)
 
         # Base search time per move in seconds
         searchTime = 0.1
@@ -142,55 +121,34 @@ class WorstFish(ExampleEngine):
                 searchTime = (timeLeft / 10) / len(legalMoves)
 
         # Initialise variables
-        worstEvaluation = None
-        worstMoves = []
+        mostDrawishEvaluation = None
+        mostDrawishMoves = []
 
         # Evaluate each move
         for move in legalMoves:
-            # Record if the move is a capture
-            move.isCapture = board.is_capture(move)
-
             # Play move
             board.push(move)
 
-            # Record if the move is a check
-            move.isCheck = board.is_check()
-
             # Evaluate position from opponent's perspective
-            evaluation = self.evaluate(board, searchTime)
+            evaluation = abs(self.evaluate(board, searchTime))
 
-            # If the evaluation is better than worstEvaluation, replace the worstMoves list with just this move
-            if worstEvaluation is None or worstEvaluation < evaluation:
-                worstEvaluation = evaluation
-                worstMoves = [move]
+            # If the evaluation is less than the minimal_drawishness, return the move
+            if evaluation <= self.minimal_drawishness:
+                return move
 
-            # If the evaluation is the same as worstEvaluation, append the move to worstMoves
-            elif worstEvaluation == evaluation:
-                worstMoves.append(move)
+            # If the evaluation is more drawish than mostDrawishEvaluation, replace the mostDrawishMoves list with just this move
+            if mostDrawishEvaluation is None or mostDrawishEvaluation < evaluation:
+                mostDrawishEvaluation = evaluation
+                mostDrawishMoves = [move]
+
+            # If the evaluation is the same as mostDrawishEvaluation, add the move to the list
+            elif mostDrawishEvaluation == evaluation:
+                mostDrawishMoves.append(move)
 
             # Un-play the move, ready for the next loop
             board.pop()
 
-        # Categorise the moves into captures, checks, and neither
-        worstCaptures = []
-        worstChecks = []
-        worstOther = []
-
-        for move in worstMoves:
-            if move.isCapture:
-                worstCaptures.append(move)
-            elif move.isCheck:
-                worstChecks.append(move)
-            else:
-                worstOther.append(move)
-
-        # Play a random move, preferring moves first from Other, then from Checks, then from Captures
-        if len(worstOther) != 0:
-            return random.choice(worstOther)
-        elif len(worstChecks) != 0:
-            return random.choice(worstChecks)
-        else:
-            return random.choice(worstCaptures)
+        return random.choice(mostDrawishMoves)
 
     def quit(self):
         self.stockfish.close()
