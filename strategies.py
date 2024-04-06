@@ -135,23 +135,34 @@ class ILoveDraws(ExampleEngine):
                 abs(evaluation.score()) if evaluation.score() is not None else None
             )
 
+            # If the evaluation is None, we are in a mate position, so disregard this move
+            if not evaluation_score:
+                board.pop()
+                continue
+
             # If the evaluation is less than the minimal_drawishness, return the move
-            if evaluation_score and evaluation_score <= self.minimal_drawishness:
+            if evaluation_score <= self.minimal_drawishness:
                 return move
 
             # If the evaluation is more drawish than mostDrawishEvaluation, replace the mostDrawishMoves list with just this move
-            if mostDrawishEvaluation is None or mostDrawishEvaluation < evaluation:
-                mostDrawishEvaluation = evaluation
+            if (
+                mostDrawishEvaluation is None
+                or mostDrawishEvaluation < evaluation_score
+            ):
+                mostDrawishEvaluation = evaluation_score
                 mostDrawishMoves = [move]
 
             # If the evaluation is the same as mostDrawishEvaluation, add the move to the list
-            elif mostDrawishEvaluation == evaluation:
+            elif mostDrawishEvaluation == evaluation_score:
                 mostDrawishMoves.append(move)
 
             # Un-play the move, ready for the next loop
             board.pop()
 
-        return random.choice(mostDrawishMoves)
+        if mostDrawishMoves:
+            return random.choice(mostDrawishMoves)
+        else:
+            return random.choice(legalMoves)
 
     def quit(self):
         self.stockfish.close()
