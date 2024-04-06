@@ -94,7 +94,7 @@ class ILoveDraws(ExampleEngine):
 
     def __init__(self, *args):
         self.stockfish = chess.engine.SimpleEngine.popen_uci(stockfishPath)
-        self.minimal_drawishness = 0.1
+        self.minimal_drawishness = 10  # centipawns
         super().__init__(*args)
 
     def evaluate(self, board, timeLimit=0.1):
@@ -130,10 +130,13 @@ class ILoveDraws(ExampleEngine):
             board.push(move)
 
             # Evaluate position from opponent's perspective
-            evaluation = abs(self.evaluate(board, searchTime))
+            evaluation = self.evaluate(board, searchTime)
+            evaluation_score = (
+                abs(evaluation.score()) if evaluation.score() is not None else None
+            )
 
             # If the evaluation is less than the minimal_drawishness, return the move
-            if evaluation <= self.minimal_drawishness:
+            if evaluation_score and evaluation_score <= self.minimal_drawishness:
                 return move
 
             # If the evaluation is more drawish than mostDrawishEvaluation, replace the mostDrawishMoves list with just this move
