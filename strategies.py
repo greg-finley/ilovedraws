@@ -131,14 +131,8 @@ class ILoveDraws(ExampleEngine):
 
             # Evaluate position from opponent's perspective
             evaluation = self.evaluate(board, searchTime)
-            evaluation_score = (
-                abs(evaluation.score()) if evaluation.score() is not None else None
-            )
-
-            # If the evaluation is None, we are in a mate position, so disregard this move
-            if not evaluation_score:
-                board.pop()
-                continue
+            evaluation_score = abs(evaluation.score(mate_score=10000))
+            assert evaluation_score is not None
 
             # If the evaluation is less than the minimal_drawishness, return the move
             if evaluation_score <= self.minimal_drawishness:
